@@ -1,17 +1,25 @@
 $(document).ready(function() {
-  g = CC.createGraphis({
+  g = GUtil.createGraphis({
     target: '#canvas',color:'#fff',x:0,y:0,unit:50,showGrid:false,
-
+	
   });
 
-  
-  
 
-	
-	
-	
-	
-autoAnimator();
+var rect = g.create('Rectangle',{vx:5,vy:2.3,strokeStyle:'red'});
+var circle = g.create('Circle',{r:0.6,vx:2.5,vy:6,strokeStyle:'#afa'});
+var triangle = g.create('Path',{close:true,vx:4,vy:5,strokeStyle:'blue'}).add(-0.5,-0.5).add(-0.2,0.7).add(0.5,-0.2);
+
+
+	g.loop(function(t){
+		//g.clear();
+		rect.angle=t/2;
+		//triangle.angle = t;
+		
+		g.draw(rect.move());
+	});
+
+//autoAnimator();
+//snakeGame();
 });
 
 
@@ -42,8 +50,8 @@ function TowersOfHanoi(){
 			$.each(poles,function(k,pole){
 				var h=0.3;var y=-h;
 				g.draw('Rectangle',{x:pole.x,y:pole.y+1,w:0.1,h:2,showFill:true,fillStyle:'black'});
-				$.each(pole.disks,function(i,disk){					
-					settings={
+				$.each(pole.disks,function(i,disk){						
+					g.draw('Rectangle',{
 						h:h,
 						y:y+=h,
 						w:disk.w,
@@ -51,16 +59,15 @@ function TowersOfHanoi(){
 						showFill:true,
 						strokeStyle:'black',
 						fillStyle:disk.fillStyle,					
-					}
-					g.draw('Rectangle',settings);
+					});
 					
 				});		
 			});				
 		}
 			
 		for(var i=n;i>0;i--){			  
-			var w = getlineMap(i,0,n,0.2,3);					
-			var rect = g.create('Rectangle',{w:w,showFill:true,fillStyle:getRandColor()});
+			var w = mathUtil.getlineMap(i,0,n,0.2,3);					
+			var rect = g.create('Rectangle',{w:w,showFill:true,fillStyle:colorUtil.getRandColor()});
 			poleA.disks.push(rect);
 		}
 		
@@ -102,9 +109,9 @@ function TowersOfHanoi(){
 
 function snakeGame(){
 	//img = g.create('Img',{x:1,y:1,vx:5,vy:5,src:'img1.png'});
-	g.x=0,g.y=0;g.stopLoop(requestId);
+	g.x=0,g.y=0;g.clearLoops();
 	var gameOver = g.create('Text',{text:'Game Over',x:3,y:6,font:'Bold 50px Sans-Serif',showFill:true,fillStyle:'red'});
-	var scoreText = g.create('Text',{text:'score: 0',x:10.5,y:7,font:'20px Sans-Serif',showFill:true,fillStyle:'blue'});
+	var scoreText = g.create('Text',{text:'score: 0',x:10.5,y:7,font:'20px Sans-Serif',showFill:true,fillStyle:'blue',dropShadow:false});
 	var snake= g.create('Tracer',{x:0,y:3,vx:5,vy:0,lineWidth:10,strokeStyle:'green',length:25,defaultLength:25,nodeLength:0.10});
 	var head= g.create('Rectangle',{w:0.3,h:0.3,angle:45,showFill:true,fillStyle:'yellow'});
 	//var body= g.create('Rectangle',{w:0.3,h:0.3,angle:45,showFill:true,fillStyle:'green'});
@@ -112,11 +119,13 @@ function snakeGame(){
 	
 	snake.head=head;
 	//snake.body = body;
-	food = g.create('Img',{x:4,y:5,w:0.5,h:0.5,src:'img1.png',});
+	//food = g.create('Img',{x:4,y:5,w:0.5,h:0.5,src:'img1.png',});
+		food = g.create('Sphere',{r:0.2,x:4,y:5,});
+	
 	for(var i=0;i<100;i++){
 		snake.move().update();
 	}
-	g.loop(function(i,loopId){
+	var loopId = g.loop(function(i){
 	
 		g.clear();	
 		snake.move();
@@ -124,19 +133,19 @@ function snakeGame(){
 		
 		isCollided=false;
 		$.each(snake.path.points,function(i,point){			
-			if(distance(point,snake.position()) <0.10 && i < snake.length-5){
+			if(mathUtil.distance(point,snake.position()) <0.10 && i < snake.length-5){
 				isCollided=true;
 				return false;
 			}		
 		});	
 
-		if(distance(food.position(),snake.position()) < 0.2){
+		if(mathUtil.distance(food.position(),snake.position()) < 0.2){
 			snake.length+=4;
 			var score = snake.length-snake.defaultLength;
 			scoreText.text = 'Score: '+ score;
-			food.x = getRand(1,11);
-			food.y = getRand(1,7);
-			food.color = getRandColor();
+			food.x = mathUtil.getRand(1,11);
+			food.y = mathUtil.getRand(1,7);
+			food.color = colorUtil.getRandColor();
 			v++;		
 		}		
 		
@@ -184,8 +193,8 @@ $(document).keydown(function(e){
 
 var requestId='';
 function lissajous(){
-	var fx = 1.003;var fy=getRand(1,3)+getRand(0,1)/2;
-	g.stopLoop(requestId);g.x=6;g.y=4;g.color="#000";
+	var fx = 1.003;var fy=mathUtil.getRand(1,3)+mathUtil.getRand(0,1)/2;
+	g.clearLoops();g.x=6;g.y=4;g.color="#000";
 	var n=0;var dt=0.01;var fi=0.01;
 	
 	var settings = {lineWidth:5,shadowColor:'#ff00ff',shadowOffsetX:0,shadowOffsetY:0,shadowBlur:30,strokeStyle:'white'};		
@@ -207,8 +216,8 @@ function lissajous(){
 			g.draw(path);
 			requestId=loopId;	
 			if(counter%50===0){
-				//path.strokeStyle=getColorFromArray(hsvToRgb(getRandf(0,1),1,1));
-				fy=getRand(1,3)+getRand(0,1)/2;
+				//path.strokeStyle=getColorFromArray(hsvToRgb(mathUtil.getRandf(0,1),1,1));
+				fy=mathUtil.getRand(1,3)+mathUtil.getRand(0,1)/2;
 			}
   		});  		
   			
@@ -216,7 +225,7 @@ function lissajous(){
 
 
 function stationaryWave(){	
-	g.stopLoop(requestId);g.x=6;g.y=4;	g.color="#efefff";
+	g.clearLoops();g.x=6;g.y=4;	g.color="#efefff";
 		var settings = {shadowColor:'blue',shadowOffsetX:50,shadowOffsetY:50,shadowBlur:30};		
 		var path1 = g.create('Path',settings);				
 		var path2 = g.create('Path',settings);		
@@ -246,7 +255,7 @@ function stationaryWave(){
 
 
 function LogintudinalWave(){
-	g.stopLoop(requestId);g.x=6;g.y=4;	g.showGrid=false;	
+	g.clearLoops();g.x=6;g.y=4;	g.showGrid=false;	
 	var rect = g.create('Rectangle',{w:0.01,h:10,strokeStyle:'blue'})
 	var tracer = g.create('Tracer',{x:0,y:-1,body:rect});		
 	var lambda = 3;	
@@ -263,7 +272,7 @@ function LogintudinalWave(){
 		g.drawArray([tracer]);	
 		requestId=loopId;
 		if(t%200===0){
-			rect.strokeStyle=getRandColor();			
+			rect.strokeStyle=colorUtil.getRandColor();			
 		}
 	});	
 }
@@ -271,7 +280,7 @@ function LogintudinalWave(){
 
 
 function piston(){
-	g.stopLoop(requestId);g.x=0;g.y=4;	
+	g.clearLoops();g.x=0;g.y=4;	
 	
 	var c = g.create('Circle',{y:-1,r:0.5});	 
 	var l1 = g.create('Line',{type:'polar',y:-1,r:0.5});	  

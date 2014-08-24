@@ -1,3 +1,7 @@
+(function(){
+
+
+
 var Box2d = function() {
   this.x = 0;
   this.y = 0;
@@ -49,6 +53,13 @@ var Box2d = function() {
     }
     return this;
   };
+  
+  
+  this.removeShadow = function(){  	  
+	  this.shadowOffsetX = 0;
+	  this.shadowOffsetY = 0;
+	  this.shadowBlur = 0;
+  }
 }
 
 //--------------------------------------------------------------------------------------------------------------------
@@ -87,8 +98,8 @@ var Line = function() {
   //update convers polar to cartisian
   this.update = function() {
     if (this.type == 'polar') {     
-      this.x2 = this.x + this.r * Math.cos(getRad(this.angle));
-      this.y2 = this.y + this.r * Math.sin(getRad(this.angle));
+      this.x2 = this.x + this.r * Math.cos(mathUtil.getRad(this.angle));
+      this.y2 = this.y + this.r * Math.sin(mathUtil.getRad(this.angle));
     }
   }
 }
@@ -97,7 +108,7 @@ Line.prototype = new Box2d();
 //Sphere
 var Sphere = function() {
   this.dType = 'Sphere';
-  this.r = 30;
+  this.r = 1;
   this.angle = 225;
   this.color = 'red';
 }
@@ -133,7 +144,7 @@ Img.prototype = new Box2d();
 var Path = function() {
   this.dType = 'Path';
   this.points = [];
-
+  this.close=false;
   this.add = function(x, y) {
     return this.points.push({
       x: x,
@@ -197,7 +208,7 @@ var Tracer = function() {
 
   //attached to object so that to override externally
   this.accept = function(p1, p2) {
-    return distance(p1, p2) > this.nodeLength;
+    return mathUtil.distance(p1, p2) > this.nodeLength;
   }
 }
 Tracer.prototype = new Box2d();
@@ -218,93 +229,18 @@ var Layer = function() {
 
 }
 Layer.prototype = new Box2d();
-
-
 //--------------------------------------------------------------------------------------------------------------------
-var distance = function(p1, p2) {
-  return Math.sqrt((p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y));
-}
-var getRand = function(a, b) {
-  return Math.round(a + (b - a) * Math.random());
-}
-var getRandf = function(a, b) {
-  return a + (b - a) * Math.random();
-}
-var getRad = function(deg) {
-  return deg * Math.PI / 180;
-}
-//y in c d for x in a b   
-//y-c/(d-c) = x-a/(b-a) 
-function getlineMap(x,a,b,c,d){
-	return (x-a)*(d-c)/(b-a) +c;
-}
-var getRandColor = function() {
-  return getColorFromArray([getRand(0, 255),getRand(0, 255),getRand(0, 255)]);
-}
+objectUtil={
+	Box2d:Box2d,
+	Rectangle:Rectangle,
+	Circle:Circle,
+	Line:Line,
+	Sphere:Sphere,
+	Text:Text,
+	Img:Img,
+	Path:Path,
+	Tracer:Tracer,
+	Layer:Layer
 
-var getColorFromArray = function(a){
-	return 'rgb(' + a[0] + ',' + a[1] + ',' + a[2] + ')';
-}
-
-/**
- * Converts an HSV color value to RGB. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
- * Assumes h, s, and v are contained in the set [0, 1] and
- * returns r, g, and b in the set [0, 255].
- *
- * @param   Number  h       The hue
- * @param   Number  s       The saturation
- * @param   Number  v       The value
- * @return  Array           The RGB representation
- */
-var hsvToRgb = function (h, s, v){	
-    var r, g, b;
-    var i = Math.floor(h * 6);
-    var f = h * 6 - i;
-    var p = v * (1 - s);
-    var q = v * (1 - f * s);
-    var t = v * (1 - (1 - f) * s);
-    switch(i % 6){
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
-    }
-
-    return [Math.round(r * 255), Math.round(g * 255),Math.round(b * 255)];
-}
-
-/**
- * Converts an RGB color value to HSV. Conversion formula
- * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
- * Assumes r, g, and b are contained in the set [0, 255] and
- * returns h, s, and v in the set [0, 255].
- *
- * @param   Number  r       The red color value
- * @param   Number  g       The green color value
- * @param   Number  b       The blue color value
- * @return  Array           The HSV representation
- */
-var rgbToHsv = function (r, g, b){
-    r = r/255, g = g/255, b = b/255;
-    var max = Math.max(r, g, b), min = Math.min(r, g, b);
-    var h, s, v = max;
-
-    var d = max - min;
-    s = max == 0 ? 0 : d / max;
-
-    if(max == min){
-        h = 0; // achromatic
-    }else{
-        switch(max){
-            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-            case g: h = (b - r) / d + 2; break;
-            case b: h = (r - g) / d + 4; break;
-        }
-        h /= 6;
-    }
-
-    return [h, s,v];
-}
+};
+}());
